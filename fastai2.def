@@ -1,0 +1,53 @@
+BootStrap: docker
+From: nvidia/cuda
+
+%environment
+    export LANG=C.UTF-8
+    export PATH=$PATH:/opt/conda/bin
+    export PYTHON_VERSION=3.7
+    export LD_LIBRARY_PATH=/usr/local/nvidia/lib:/usr/local/nvidia/lib64
+
+%post
+    export LANG=C.UTF-8
+    export PATH=$PATH:/opt/conda/bin
+    export PYTHON_VERSION=3.7
+    export LD_LIBRARY_PATH=/usr/local/nvidia/lib:/usr/local/nvidia/lib64
+
+    apt-get -y update
+    apt-get -y install --no-install-recommends build-essential ca-certificates \ 
+            git vim zip unzip curl python3-pip python3-setuptools graphviz
+    apt-get clean
+    rm -rf /var/lib/apt/lists/*
+
+    pip3 install --upgrade pip
+
+    curl -o ~/miniconda.sh -O \
+      https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh \
+      && chmod +x ~/miniconda.sh \
+      && ~/miniconda.sh -b -p /opt/conda \
+      && rm ~/miniconda.sh \
+      && conda install conda-build
+
+    conda update conda && conda install -c pytorch -c fastai fastai \
+      && conda install jupyter notebook \
+      && conda install -c conda-forge jupyter_contrib_nbextensions
+
+    mkdir -p /data/shared
+    cd /data/shared && git clone https://github.com/fastai/fastai2 \
+    && git clone https://github.com/fastai/fastcore
+
+    cd /data/shared/fastcore && python3.7 -m pip install -e ".[dev]"
+    cd /data/shared/fastai2  && python3.7 -m pip install -e ".[dev]"
+
+    conda install pyarrow
+    python3.7 -m pip install graphviz ipywidgets matplotlib nbdev>=0.2.12 \
+        pandas scikit_learn azure-cognitiveservices-search-imagesearch sentencepiece
+
+%startscript
+    jupyter notebook --ip=0.0.0.0 --port=9999 --no-browser \
+        --NotebookApp.password='sha1:a60ff295d0b9:506732d050d4f50bfac9b6d6f37ea6b86348f4ed' \
+        --log-level=WARN --notebook-dir=/data/shared/ &
+
+%labels
+    ABOUT container for fastai2 (dev editable install) with jupyter notebook on startup (port 9999), for March 2020 fastai course
+    AUTHOR Yijin Lee
