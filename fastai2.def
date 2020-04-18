@@ -14,7 +14,7 @@ From: nvidia/cuda
     export LD_LIBRARY_PATH=/usr/local/nvidia/lib:/usr/local/nvidia/lib64
 
     apt-get -y update
-    apt-get -y install --no-install-recommends build-essential ca-certificates \ 
+    apt-get -y install --no-install-recommends build-essential ca-certificates \
             git vim zip unzip curl python3-pip python3-setuptools graphviz
     apt-get clean
     rm -rf /var/lib/apt/lists/*
